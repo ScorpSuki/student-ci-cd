@@ -1,0 +1,34 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Кодты жүктеу
+        uses: actions/checkout@v3
+
+      - name: Python орнату
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Тәуелділіктер орнату
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Тест жүргізу
+        run: pytest -v
+
+      - name: Docker image құру
+        if: success()
+        run: docker build -t student-app .
+
+      - name: Контейнерді іске қосу
+        if: success()
+        run: docker run --rm student-app
